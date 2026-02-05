@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AdStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CampaignStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum LedgerReason {
+  WATCH_REWARD
+  CAMPAIGN_SPEND
+  ADMIN_ADJUST
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum MediaIngestStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  telegramId   String   @unique
+  username     String?
+  status       UserStatus @default(ACTIVE)
+  country      String?
+  ageVerified  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  wallet       Wallet?
+  ads          Ad[]
+  campaigns    Campaign[]
+  views        AdView[] @relation("UserViews")
+  ledger       LedgerEntry[]
+  fraudFlags   FraudFlag[]
+  dailyEarnings DailyEarning[]
+}
+
+model Wallet {
+  userId    String  @id
+  balance   Int     @default(0)
+  updatedAt DateTime @updatedAt
+  user      User    @relation(fields: [userId], references: [id])
+}
+
+model LedgerEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  delta     Int
+  reason    LedgerReason
+  refType   String?
+  refId     String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Ad {
+  id        String   @id @default(cuid())
+  ownerId   String
+  type      String
+  title     String
+  mediaKey  String
+  mediaDurationSeconds Int?
+  status    AdStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  owner     User     @relation(fields: [ownerId], references: [id])
+  campaigns Campaign[]
+  views     AdView[]
+  moderation ModerationQueue?
+  ingestJob MediaIngestJob?
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  adId        String
+  ownerId     String
+  budgetCoins Int
+  spendCoins  Int      @default(0)
+  status      CampaignStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  ad          Ad       @relation(fields: [adId], references: [id])
+  owner       User     @relation(fields: [ownerId], references: [id])
+}
+
+model AdView {
+  id               String   @id @default(cuid())
+  adId             String
+  viewerId         String
+  startedAt        DateTime @default(now())
+  completedAt      DateTime?
+  clientFingerprint String?
+  ipAddress        String?
+  userAgent        String?
+  clientWatchedSeconds Int?
+  clientCompleted   Boolean @default(false)
+  valid            Boolean  @default(false)
+  ad               Ad       @relation(fields: [adId], references: [id])
+  viewer           User     @relation("UserViews", fields: [viewerId], references: [id])
+}
+
+model ModerationQueue {
+  adId      String   @id
+  status    ModerationStatus @default(PENDING)
+  reviewerId String?
+  notes     String?
+  updatedAt DateTime @updatedAt
+  ad        Ad       @relation(fields: [adId], references: [id])
+}
+
+model FraudFlag {
+  id        String   @id @default(cuid())
+  userId    String
+  reason    String
+  severity  Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model DailyEarning {
+  id        String   @id @default(cuid())
+  userId    String
+  date      String
+  coins     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+}
+
+model MediaIngestJob {
+  id        String   @id @default(cuid())
+  adId      String   @unique
+  status    MediaIngestStatus @default(PENDING)
+  attempts  Int      @default(0)
+  lastError String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ad        Ad       @relation(fields: [adId], references: [id])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  actorKeyHash String
+  action     String
+  targetType String
+  targetId   String
+  metadata   String?
+  createdAt  DateTime @default(now())
+}

@@ -1,0 +1,18 @@
+{
+  "name": "adbot",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm -w @adbot/api run dev",
+    "dev:bot": "npm -w @adbot/bot run dev",
+    "dev:web": "npm -w @adbot/web run dev",
+    "build": "npm -w @adbot/api run build && npm -w @adbot/bot run build && npm -w @adbot/web run build",
+    "lint": "echo 'lint not configured'",
+    "test": "echo 'tests not configured'"
+  },
+  "devDependencies": {
+    "prisma": "^7.3.0"
+  }
+}

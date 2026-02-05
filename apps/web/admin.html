@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdBot Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="admin">
+      <header>
+        <h1>AdBot Admin</h1>
+        <p>Moderate ads, review fraud flags, and adjust coins.</p>
+      </header>
+
+      <section class="panel">
+        <h2>Admin Auth</h2>
+        <div class="row">
+          <input id="adminKey" type="password" placeholder="Admin API key" />
+          <button id="loadData">Load data</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Moderation Queue</h2>
+        <div id="moderation"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Adjust Coins</h2>
+        <div class="row">
+          <input id="adjustUserId" type="text" placeholder="User ID" />
+          <input id="adjustDelta" type="number" placeholder="Delta (e.g. 50 or -50)" />
+          <button id="adjustCoins">Apply</button>
+        </div>
+        <p class="meta" id="adjustStatus"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Adjustment History</h2>
+        <div id="adjustments"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Campaign Controls</h2>
+        <div class="row">
+          <input id="campaignQuery" type="text" placeholder="Search by campaign id, ad title, or telegram id" />
+          <select id="campaignStatus">
+            <option value="">All statuses</option>
+            <option value="ACTIVE">Active</option>
+            <option value="PAUSED">Paused</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+          <button id="campaignFilter">Search</button>
+        </div>
+        <div id="campaigns"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Fraud Flags</h2>
+        <div id="fraud"></div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/admin.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdBot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">AdBot</p>
+          <h1>Watch ads. Earn coins. Launch your campaign.</h1>
+          <p class="lead">
+            Earn virtual coins by watching short ads. Spend coins to post your own
+            video or banner campaigns. Everything happens right here in Telegram.
+          </p>
+          <div class="hero-actions">
+            <button id="connect">Connect Telegram</button>
+            <button id="openWallet" class="ghost">Open Wallet</button>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <p class="label">Daily cap</p>
+            <p class="value" id="dailyCap">--</p>
+          </div>
+          <div>
+            <p class="label">Coins per watch</p>
+            <p class="value" id="coinPerWatch">--</p>
+          </div>
+          <div>
+            <p class="label">Balance</p>
+            <p class="value" id="balance">--</p>
+          </div>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel">
+          <h2>Watch & Earn</h2>
+          <p>Tap start to get the next approved ad in the queue.</p>
+          <div class="media" id="adMedia">
+            <p>No ad loaded yet.</p>
+          </div>
+          <div class="row">
+            <button id="startWatch">Start Ad</button>
+            <button id="completeWatch" class="ghost">Complete</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Create an Ad</h2>
+          <p>Upload a video or banner. New ads require manual review.</p>
+          <div class="stack">
+            <input id="adTitle" type="text" placeholder="Ad title" />
+            <select id="adType">
+              <option value="video">Video</option>
+              <option value="banner">Banner</option>
+            </select>
+            <input id="adFile" type="file" />
+            <input id="mediaKey" type="text" placeholder="Media key (or auto from upload)" />
+            <button id="createAd">Submit for review</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Run Campaign</h2>
+          <p>Spend coins to activate a campaign for your ad.</p>
+          <div class="stack">
+            <input id="campaignAdId" type="text" placeholder="Ad ID" />
+            <input id="campaignBudget" type="number" placeholder="Budget coins" />
+            <button id="createCampaign">Start campaign</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Ledger</h2>
+          <ul id="ledger"></ul>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
