@@ -8,6 +8,11 @@ import { probeDurationSeconds } from "../utils/ffprobe";
 
 const router = Router();
 
+function headerString(value: string | string[] | undefined) {
+  if (!value) return undefined;
+  return Array.isArray(value) ? value[0] : value;
+}
+
 router.get("/queue", authRequired, async (req, res) => {
   const userId = req.user!.sub;
 
@@ -55,15 +60,15 @@ router.get("/queue", authRequired, async (req, res) => {
 
 router.post("/:id/view/start", authRequired, async (req, res) => {
   const userId = req.user!.sub;
-  const adId = req.params.id;
+  const adId = String(req.params.id);
 
   const view = await prisma.adView.create({
     data: {
       adId,
       viewerId: userId,
-      clientFingerprint: req.headers["x-client-fingerprint"] as string | undefined,
+      clientFingerprint: headerString(req.headers["x-client-fingerprint"]),
       ipAddress: req.ip,
-      userAgent: req.headers["user-agent"] as string | undefined
+      userAgent: headerString(req.headers["user-agent"])
     }
   });
 
@@ -78,7 +83,7 @@ const CompleteSchema = z.object({
 
 router.post("/:id/view/complete", authRequired, async (req, res) => {
   const userId = req.user!.sub;
-  const adId = req.params.id;
+  const adId = String(req.params.id);
   const parse = CompleteSchema.safeParse(req.body);
   if (!parse.success) {
     return res.status(400).json({ error: "invalid_payload" });
@@ -273,7 +278,7 @@ router.post("/", authRequired, async (req, res) => {
 
 router.post("/:id/ingest-duration", authRequired, async (req, res) => {
   const userId = req.user!.sub;
-  const adId = req.params.id;
+  const adId = String(req.params.id);
   const ad = await prisma.ad.findUnique({ where: { id: adId } });
   if (!ad) {
     return res.status(404).json({ error: "ad_not_found" });
