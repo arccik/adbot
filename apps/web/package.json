@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "../../node_modules/.bin/vite build",
     "preview": "vite preview --host"
   },
   "devDependencies": {
