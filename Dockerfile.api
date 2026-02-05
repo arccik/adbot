@@ -1,0 +1,30 @@
+FROM node:20-bookworm-slim AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY apps/api/package.json apps/api/package.json
+COPY prisma/schema.prisma prisma/schema.prisma
+COPY prisma.config.ts ./
+RUN npm ci
+
+FROM node:20-bookworm-slim AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+COPY tsconfig.base.json ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+COPY apps/api ./apps/api
+RUN npx prisma generate
+RUN npm -w @adbot/api run build
+
+FROM node:20-bookworm-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/apps/api/dist ./apps/api/dist
+COPY --from=build /app/prisma.config.ts ./
+COPY scripts/entrypoint-api.sh /entrypoint-api.sh
+RUN chmod +x /entrypoint-api.sh
+EXPOSE 4000
+CMD ["/entrypoint-api.sh"]

@@ -1,0 +1,27 @@
+FROM node:20-bookworm-slim AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY apps/bot/package.json apps/bot/package.json
+COPY prisma/schema.prisma prisma/schema.prisma
+COPY prisma.config.ts ./
+RUN npm ci
+
+FROM node:20-bookworm-slim AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+COPY tsconfig.base.json ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+COPY apps/bot ./apps/bot
+RUN npx prisma generate
+RUN npm -w @adbot/bot run build
+
+FROM node:20-bookworm-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/apps/bot/dist ./apps/bot/dist
+COPY --from=build /app/prisma.config.ts ./
+CMD ["node", "apps/bot/dist/index.js"]

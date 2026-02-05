@@ -48,6 +48,21 @@ npm run dev:web
 - Background worker: run `npm -w @adbot/api run worker` to ingest media durations.
 
 ## Production
-- Deploy `apps/api` and `apps/bot` to ECS/Fargate.
-- Host `apps/web` on S3 + CloudFront (or any static hosting).
-- Use RDS Postgres and S3 for media.
+### Option A: Single VM with Docker Compose (simplest)
+1. Install Docker + Docker Compose on your VM.
+2. Copy repo to the VM.
+3. Create `.env` with your secrets (see `.env.example`).
+4. Update `Caddyfile` email and domain.
+5. Run:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+This runs:
+- `api` (Express + Prisma)
+- `bot` (Telegraf)
+- `worker` (media ingest)
+- `web` (static web app)
+- `db` (Postgres)
+- `caddy` (HTTPS reverse proxy)
