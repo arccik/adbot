@@ -43,7 +43,7 @@ router.get("/moderation", adminRequired, async (_req, res) => {
 });
 
 router.post("/moderation/:id/approve", adminRequired, async (req, res) => {
-  const adId = req.params.id;
+  const adId = String(req.params.id);
   const key = req.headers["x-admin-key"] as string;
   await prisma.$transaction(async (tx) => {
     await tx.moderationQueue.update({
@@ -67,7 +67,7 @@ router.post("/moderation/:id/approve", adminRequired, async (req, res) => {
 const RejectSchema = z.object({ notes: z.string().optional() });
 
 router.post("/moderation/:id/reject", adminRequired, async (req, res) => {
-  const adId = req.params.id;
+  const adId = String(req.params.id);
   const key = req.headers["x-admin-key"] as string;
   const parse = RejectSchema.safeParse(req.body);
   if (!parse.success) {
@@ -96,7 +96,7 @@ router.post("/moderation/:id/reject", adminRequired, async (req, res) => {
 const AdjustSchema = z.object({ delta: z.number().int() });
 
 router.post("/users/:id/adjust-coins", adminRequired, async (req, res) => {
-  const userId = req.params.id;
+  const userId = String(req.params.id);
   const key = req.headers["x-admin-key"] as string;
   const parse = AdjustSchema.safeParse(req.body);
   if (!parse.success) {
@@ -171,7 +171,7 @@ router.get("/campaigns", adminRequired, async (_req, res) => {
 });
 
 router.post("/campaigns/:id/pause", adminRequired, async (req, res) => {
-  const id = req.params.id;
+  const id = String(req.params.id);
   const key = req.headers["x-admin-key"] as string;
   const campaign = await prisma.campaign.update({
     where: { id },
@@ -187,7 +187,7 @@ router.post("/campaigns/:id/pause", adminRequired, async (req, res) => {
 });
 
 router.post("/campaigns/:id/resume", adminRequired, async (req, res) => {
-  const id = req.params.id;
+  const id = String(req.params.id);
   const key = req.headers["x-admin-key"] as string;
   const existing = await prisma.campaign.findUnique({ where: { id } });
   if (!existing) {
