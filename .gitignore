@@ -5,3 +5,5 @@ node_modules
 /apps/**/dist
 /.turbo
 .DS_Store
+cloudfront_private_key.pem
+cloudfront_public_key.pem
