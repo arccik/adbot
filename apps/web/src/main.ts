@@ -14,6 +14,15 @@ const coinPerWatchEl = document.getElementById("coinPerWatch") as HTMLElement;
 const balanceEl = document.getElementById("balance") as HTMLElement;
 const ledgerEl = document.getElementById("ledger") as HTMLElement;
 const adMediaEl = document.getElementById("adMedia") as HTMLElement;
+const connectNotice = document.createElement("p");
+connectNotice.style.color = "#5f6473";
+connectNotice.style.marginTop = "8px";
+connectNotice.textContent = "";
+connectButton.insertAdjacentElement("afterend", connectNotice);
+
+function setNotice(message: string) {
+  connectNotice.textContent = message;
+}
 
 let currentAdId: string | null = null;
 let currentViewId: string | null = null;
@@ -33,6 +42,45 @@ function getToken() {
 
 function setToken(token: string) {
   localStorage.setItem("adbot_token", token);
+}
+
+async function performAuth(initData: string) {
+  const res = await fetch(`${apiUrl}/auth/telegram`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ initData })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    setToken(data.token);
+    connectButton.disabled = true;
+    connectButton.textContent = "Connected";
+    setNotice("Connected.");
+    await fetchWallet();
+  } else {
+    setNotice(data.error ?? "Auth failed");
+  }
+}
+
+async function autoConnect() {
+  // @ts-ignore
+  const tg = window.Telegram?.WebApp;
+  if (!tg) {
+    setNotice("Open this app inside Telegram to connect.");
+    return;
+  }
+  try {
+    tg.ready();
+    tg.expand();
+  } catch {
+    // ignore sdk errors
+  }
+  const initData = tg.initData;
+  if (!initData) {
+    setNotice("Telegram did not send init data. Make sure /setdomain in @BotFather matches WEB_APP_URL and open from the bot button.");
+    return;
+  }
+  await performAuth(initData);
 }
 
 async function fetchSettings() {
@@ -64,21 +112,10 @@ async function connectTelegram() {
   // @ts-ignore
   const initData = window.Telegram?.WebApp?.initData;
   if (!initData) {
-    alert("Open this page inside Telegram to connect.");
+    setNotice("Open this app inside Telegram to connect.");
     return;
   }
-  const res = await fetch(`${apiUrl}/auth/telegram`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ initData })
-  });
-  const data = await res.json();
-  if (res.ok) {
-    setToken(data.token);
-    await fetchWallet();
-  } else {
-    alert(data.error ?? "Auth failed");
-  }
+  await performAuth(initData);
 }
 
 async function startWatch() {
@@ -275,3 +312,4 @@ completeWatchButton.disabled = true;
 
 fetchSettings();
 fetchWallet();
+autoConnect();
